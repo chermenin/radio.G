@@ -1,0 +1,26 @@
+{
+  "name": "radio.G",
+  "version": "0.1.0",
+  "description": "Radio.Garden client",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-packager . $npm_package_productName --out=dist/osx --platform=darwin --arch=x64 --icon=icon.icns"
+  },
+  "keywords": [
+    "radio"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chermenin/radio.G.git"
+  },
+  "author": "Alex Chermenin",
+  "license": "MIT",
+  "dependencies": {
+    "electron-config": "^2.0.0"
+  },
+  "devDependencies": {
+    "electron": "^8.2.3",
+    "electron-packager": "^14.2.1"
+  }
+}

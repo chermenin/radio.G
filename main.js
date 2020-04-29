@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, screen } = require('electron')
+const { app, BrowserWindow, Menu, screen, shell } = require('electron')
 const Config = require('electron-config')
 const config = new Config();
 
@@ -24,47 +24,45 @@ function createWindow (width) {
     },
     resizable: false,
     maximizable: false,
-    fullscreen: false,
-    titleBarStyle: "hidden",
-    icon: __dirname + "/icon.icns"
+    fullscreen: false
   })
 
   win.setMenu(null);
-
-  // and load the app.
   win.loadURL('http://radio.garden')
 
-  win.webContents.on('did-finish-load', ()=>{
+  let content = win.webContents
+
+  content.on('did-finish-load', () => {
     let code = `
-      let appTopBar = document.createElement('div')
-      appTopBar.style.width = "100%"
-      appTopBar.style.height = "20px"
-      appTopBar.style.position = "absolute"
-      appTopBar.style.top = appTopBar.style.left = 0
-      appTopBar.style.webkitAppRegion = "drag"
-      document.body.appendChild(appTopBar)
+      let setVolumeInterval = setInterval(() => {
+        if (__getState().player !== null) {
+          clearInterval(setVolumeInterval)
+          __getState().player.volume = localStorage.getItem('volume') || 0.8
+        }
+      }, 200)
     `;
-    win.webContents.executeJavaScript(code);
+    content.executeJavaScript(code);
   })
 
-  win.on('close', () => {
+  content.on('new-window', function(event, url){
+    event.preventDefault();
+    shell.openExternal(url);
+  });
+
+  win.on('close', (e) => {
+    e.preventDefault()
+    content.executeJavaScript(`localStorage.setItem('volume', __getState().player.volume)`);
     config.set('winBounds', win.getBounds())
+    setTimeout(() => app.exit(), 100)
+  });
+
+  win.on('page-title-updated', (e, v) => {
+    e.preventDefault()
+    win.setTitle(v.replace('Radio Garden', 'radio.G'))
   });
 }
 
 app.on('ready', () => {
   const { width } = screen.getPrimaryDisplay().workAreaSize
   createWindow(width)
-})
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-  }
-})
-
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow()
-  }
 })

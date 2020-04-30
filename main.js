@@ -2,7 +2,7 @@ const { app, BrowserWindow, Menu, screen, shell } = require('electron')
 const Config = require('electron-config')
 const config = new Config();
 
-const appWidth = 350, appHeight = 570, defaultOffset = 30;
+const appWidth = 320, appHeight = 520, defaultOffset = 30;
 
 Menu.setApplicationMenu(false)
 
@@ -28,7 +28,7 @@ function createWindow (width) {
   })
 
   win.setMenu(null);
-  win.loadURL('http://radio.garden')
+  win.loadURL(config.get('location', 'http://radio.garden'))
 
   let content = win.webContents
 
@@ -38,6 +38,7 @@ function createWindow (width) {
         if (__getState().player !== null) {
           clearInterval(setVolumeInterval)
           __getState().player.volume = localStorage.getItem('volume') || 0.8
+          __getState().ui.channelLocked = localStorage.getItem('channelLocked') || false
         }
       }, 200)
     `;
@@ -51,8 +52,12 @@ function createWindow (width) {
 
   win.on('close', (e) => {
     e.preventDefault()
-    content.executeJavaScript(`localStorage.setItem('volume', __getState().player.volume)`);
+    content.executeJavaScript(`
+      localStorage.setItem('volume', __getState().player.volume)
+      localStorage.setItem('channelLocked', __getState().ui.channelLocked)
+    `);
     config.set('winBounds', win.getBounds())
+    config.set('location', content.getURL())
     setTimeout(() => app.exit(), 100)
   });
 

@@ -20,7 +20,7 @@
     "electron-config": "^2.0.0"
   },
   "devDependencies": {
-    "electron": "^35.7.5",
+    "electron": "^39.8.5",
     "electron-packager": "^17.1.1"
   }
 }
